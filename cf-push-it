@@ -1,10 +1,11 @@
 #!/usr/bin/env ruby
 
+require 'pty'
+
 fork do
   `afplay push-it.mp3`
 end
 
-sleep(5)
-puts "ALL DONE"
+system("cf push #{ARGV.join(' ')}")
 
 `killall afplay`
