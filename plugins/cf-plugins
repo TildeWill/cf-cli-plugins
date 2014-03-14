@@ -40,11 +40,11 @@ class Plugin
   end
 
   def self.host
-    'localhost'
+    'plugins-server-1.cfapps.io'
   end
 
   def self.port
-    4000
+    80
   end
 
   def self.hostname
