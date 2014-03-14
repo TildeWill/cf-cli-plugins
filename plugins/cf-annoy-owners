@@ -41,7 +41,7 @@ owners.each do |owner|
   puts ""
 end
 
-if $?.exitstatus == 7
+if $?.exitstatus == 7 || $?.exitstatus == 0
   puts "Owners notified."
 else
   puts "Error notifying owners."
