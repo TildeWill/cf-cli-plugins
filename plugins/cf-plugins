@@ -29,7 +29,7 @@ class Plugin
         rescue Errno::EEXIST
         end
 
-        open(File.expand_path("~/.cf-plugins/#{name}"), "wb") do |file|
+        open(File.expand_path("~/.cf-plugins/cf-#{name}"), "wb") do |file|
           file.write(resp.body)
         end
         puts "successfully installed #{name}"
