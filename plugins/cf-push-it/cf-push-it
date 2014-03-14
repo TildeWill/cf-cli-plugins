@@ -1,9 +1,7 @@
 #!/usr/bin/env ruby
 
-require 'pty'
-
 fork do
-  `afplay push-it.mp3`
+  `afplay #{File.dirname(__FILE__)}/push-it.mp3`
 end
 
 system("cf push #{ARGV.join(' ')}")
