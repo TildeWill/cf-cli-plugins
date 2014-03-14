@@ -88,7 +88,7 @@ class Plugin
 
   def self.list
     Dir.glob(File.expand_path("~/.cf-plugins/cf-*")).each do |plugin|
-      puts "* #{plugin[("/Users/pivotal/.cf-plugins/cf-".length)..-1]}"
+      puts "* #{plugin[(File.expand_path("~/.cf-plugins/cf-").length)..-1]}"
     end
   end
 end
