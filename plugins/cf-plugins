@@ -28,7 +28,7 @@ class Plugin
           Dir.mkdir(File.expand_path("~/.cf-plugins"))
         rescue Errno::EEXIST
         end
-        
+
         open(File.expand_path("~/.cf-plugins/#{name}"), "wb") do |file|
           file.write(resp.body)
         end

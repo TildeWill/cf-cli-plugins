@@ -12,9 +12,9 @@ $stderr.sync = true
 
 class CliPluginsApp < Sinatra::Base
   def get_plugins
-    Dir.glob("../cf-*").map do |plugin|
+    Dir.glob("#{plugins_dir}/cf-*").map do |plugin|
       {
-        name: plugin[6..-1],
+        name: plugin[14..-1],
         description: "A mighty fine plugin"
       }
     end
@@ -36,11 +36,17 @@ class CliPluginsApp < Sinatra::Base
     name = params[:name]
     plugin = get_plugins.find { |p| p[:name] == name }
     if plugin
-      send_file File.join('..', "cf-#{name}")
+      send_file File.join(plugins_dir, "cf-#{name}")
     else
       pass
     end
   end
 
   run! if app_file == $0
+
+  private
+
+  def plugins_dir
+    "../plugins"
+  end
 end
