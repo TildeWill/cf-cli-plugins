@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+
+fork do
+  `afplay push-it.mp3`
+end
+
+sleep(5)
+puts "ALL DONE"
+
+`killall afplay`
