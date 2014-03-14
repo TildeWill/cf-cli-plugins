@@ -1,0 +1,51 @@
+#!/usr/bin/env ruby
+
+account_id = ENV['TWILIO_SID']
+auth_token = ENV['TWILIO_AUTH_TOKEN']
+twilio_number = "6504818933"
+
+sleep 1.3
+
+unless account_id && auth_token 
+  puts "annoy owners has not been configured correctly. SAD TROMBONE"
+  exit 1
+end
+
+unless ARGV.length == 1
+  puts "usage: cf annoy-owners $APP_NAME"
+  exit 1
+end
+
+puts "Looking for the owners of app '#{ARGV[0]}'..."
+sleep 1.75
+
+unless ARGV[0] == "whatta-man" 
+  puts "Could not find the owners of '#{ARGV[0]}'"
+  exit 1
+end
+
+puts "OK"
+puts ""
+
+owners = [
+  ["Tim Jarratt", "4158608430"],
+]
+
+owners.each do |owner|
+  sleep 2
+  puts "Notifying... #{owner[0]}"
+
+  `curl -X POST 'https://api.twilio.com/2010-04-01/Accounts/#{account_id}/Calls.json' --data-urlencode 'To=#{owner[1]}'  --data-urlencode 'From=#{twilio_number}'  -d 'Method=GET'  -d 'FallbackMethod=GET'  -d 'StatusCallbackMethod=GET'  -d 'Record=false' -u #{account_id}:#{auth_token}  --data-urlencode 'Url=http://www.here-and-now.info/audio/rickastley_artists.mp3' 2&> /dev/null`
+
+  puts "OK"
+  puts ""
+end
+
+if $?.exitstatus == 7
+  puts "Owners notified."
+else
+  puts "Error notifying owners."
+end
+
+
+
