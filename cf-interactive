@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+
+def prompt
+  print "cf> "
+end
+
+prompt
+while cmd = gets
+  break if cmd.strip == "exit"
+  system "cf #{cmd}"
+  prompt
+end
+
