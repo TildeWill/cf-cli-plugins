@@ -2,10 +2,57 @@
 
 require 'net/http'
 require 'json'
+require 'rubygems'
+require 'rubygems/package'
+require 'zlib'
+require 'fileutils'
 
 class Plugin
+
+
+  # un-gzips the given IO, returning the
+  # decompressed version as a StringIO
+  def self.ungzip(tarfile)
+    z = Zlib::GzipReader.new(tarfile)
+    unzipped = StringIO.new(z.read)
+    z.close
+    unzipped
+  end
+
+  # untars the given IO into the specified
+  # directory
+  def self.untar(io, destination)
+    Gem::Package::TarReader.new io do |tar|
+      tar.each do |tarfile|
+        destination_file = File.join destination, tarfile.full_name
+
+        if tarfile.directory?
+          FileUtils.mkdir_p destination_file
+        else
+          destination_directory = File.dirname(destination_file)
+          FileUtils.mkdir_p destination_directory unless File.directory?(destination_directory)
+          File.open destination_file, "wb" do |f|
+            f.print tarfile.read
+          end
+        end
+      end
+    end
+  end
+
+  def self.host
+    'localhost'
+  end
+
+  def self.port
+    4000
+  end
+
+  def self.hostname
+    "#{host}:#{port}"
+  end
+
   def self.search(term = nil)
-    uri = URI("http://localhost:4000/search#{term ? "?term=#{term}" : ""}")
+    uri = URI("http://#{hostname}/search#{term ? "?term=#{term}" : ""}")
     req = Net::HTTP::Get.new(uri)
     res = Net::HTTP.start(uri.hostname, uri.port) do |http|
       http.request(req)
@@ -19,7 +66,7 @@ class Plugin
   end
 
   def self.install(name)
-    Net::HTTP.start("localhost", 4000) do |http|
+    Net::HTTP.start(host, port) do |http|
       resp = http.get("/download/#{name}")
       if 404 == resp.code.to_i
         puts "#{name} not found"
@@ -29,9 +76,11 @@ class Plugin
         rescue Errno::EEXIST
         end
 
-        open(File.expand_path("~/.cf-plugins/cf-#{name}"), "wb") do |file|
-          file.write(resp.body)
-        end
+        destination = File.expand_path("~/.cf-plugins/")
+        body_io = StringIO.new(resp.body)
+        untar(ungzip(body_io), destination)
+        File.chmod(0755, File.expand_path("~/.cf-plugins/cf-#{name}"))
+
         puts "successfully installed #{name}"
       end
     end
