@@ -15,10 +15,14 @@ class CliPluginsApp < Sinatra::Base
   include Util::Tar
 
   def get_plugins
-    Dir.glob("#{plugins_dir}/cf-*").map do |plugin|
+    Dir.glob("#{plugins_dir}/cf-*").sort.map do |plugin|
+      plugin[13..-1]
+    end.reject do |plugin|
+      plugin == "plugins"
+    end.map do |plugin|
       {
-        name: plugin[13..-1],
-        description: "A mighty fine plugin"
+        name: plugin,
+        description: File.read(File.expand_path "plugins/cf-#{plugin}/description").strip
       }
     end
   end
@@ -39,20 +43,10 @@ class CliPluginsApp < Sinatra::Base
     name = params[:name]
     plugin = get_plugins.find { |p| p[:name] == name }
     if plugin
-      full_path = File.join(plugins_dir, "cf-#{name}")
-      #send_data generate_tgz(full_path), filename: "cf-#{name}"
       data = gzip(tar(File.join(plugins_dir, "cf-#{name}")))
-      #send_data data, filename: "cf-#{name}.tgz"
       content_type 'application/octet-stream'
       attachment("cf-#{name}.tgz")
       data
-      #send_file File.join(plugins_dir, "cf-#{name}")
-      #
-      #tar = StringIO.new
-      #
-      #Gem::Package::TarWriter.new(tar) do |writer|
-      #  writer.add_file("hello_world.txt", 0644) { |f| f.write("Hello world!\n") }
-      #end
     else
       pass
     end
