@@ -1,0 +1,60 @@
+#!/usr/bin/env ruby
+
+require 'net/http'
+require 'json'
+
+class Plugin
+  def self.search(term = nil)
+    uri = URI("http://localhost:4000/search#{term ? "?term=#{term}" : ""}")
+    req = Net::HTTP::Get.new(uri)
+    res = Net::HTTP.start(uri.hostname, uri.port) do |http|
+      http.request(req)
+    end
+
+    plugins = JSON.parse(res.body)
+    max_name_length = plugins.map { |p| p["name"].length }.max
+    plugins.each do |plugin|
+      printf "%-#{max_name_length}s : %s\n", "#{plugin["name"]}", plugin["description"]
+    end
+  end
+
+  def self.install(name)
+    Net::HTTP.start("localhost", 4000) do |http|
+      resp = http.get("/download/#{name}")
+      if 404 == resp.code.to_i
+        puts "#{name} not found"
+      else
+        begin
+          Dir.mkdir(File.expand_path("~/.cf-plugins"))
+        rescue Errno::EEXIST
+        end
+        
+        open(File.expand_path("~/.cf-plugins/#{name}"), "wb") do |file|
+          file.write(resp.body)
+        end
+        puts "successfully installed #{name}"
+      end
+    end
+  end
+end
+
+cmd = ARGV[0] || "list"
+
+def usage
+  puts "cf plugins search # all available"
+  puts "cf plugins search term # /.*term.*/i available"
+  puts "cf plugins [list] # plugins currently installed"
+  puts "cf plugins install [plugin]"
+end
+
+case cmd
+when "search", "s"
+  Plugin.search(ARGV.length > 1 && ARGV[1])
+when "install", "i"
+  Plugin.install(ARGV[1])
+when "list", "l"
+  puts "* plugins"
+  puts "* echo"
+when "help", "--help", "-h"
+  usage
+end
