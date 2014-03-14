@@ -17,7 +17,7 @@ class CliPluginsApp < Sinatra::Base
   def get_plugins
     Dir.glob("#{plugins_dir}/cf-*").map do |plugin|
       {
-        name: plugin[14..-1],
+        name: plugin[13..-1],
         description: "A mighty fine plugin"
       }
     end
@@ -63,6 +63,6 @@ class CliPluginsApp < Sinatra::Base
   private
 
   def plugins_dir
-    "../plugins"
+    "./plugins"
   end
 end
