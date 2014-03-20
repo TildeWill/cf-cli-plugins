@@ -1,0 +1,19 @@
+<% require 'securerandom' %>
+---
+env:
+  VERIFY_SSL: <%= prompt(:boolean, "Enable SSL verification?") %>
+  BASIC_AUTH_PASSWORD: "<%= prompt(String, "What is the basic auth password?", "truitt2cool") %>"
+  SECRET_TOKEN: "<%= prompt(String, "Please specify a Secret Token for Rails cookies:", SecureRandom.uuid) %>"
+  BUNDLE_WITHOUT: "test:development"
+
+  <% service_prompt("frontend-db", "Please bind to a Postgres database for the web frontend") %>
+
+applications:
+- name: app-web
+  host: <%= prompt(String, "Web App hostname:", "cold-push-web")%>
+  instances: <%= prompt(Integer, "How many app-web instances?", 2) %>
+  memory: <%= prompt(Integer, "Please specify in MB how much memory to allocate for each Web App instance:", 512) %>M
+- name: app-workers
+  instances: <%= prompt(Integer, "How many app-workers instances?", 3) %>
+  memory: <%= prompt(Integer, "Please specify in MB how much memory to allocate for each worker instance:", 256) %>M
+
